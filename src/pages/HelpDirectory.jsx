@@ -7,6 +7,7 @@ import FusionCloseButton from "../components/FusionCloseButton";
 import { Settings, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getUrlParam } from "@/lib/urlParams";
+import { isInFusionIframe, isFusionAdmin } from "@/lib/fusionBridge";
 
 export default function HelpDirectory() {
   const navigate = useNavigate();
@@ -24,13 +25,23 @@ export default function HelpDirectory() {
   }, []);
 
   const [isAdminUser, setIsAdminUser] = useState(false);
-  const isAdmin = (getUrlParam("Admin")?.toLowerCase() === "true") || isAdminUser;
+  const adminParam = getUrlParam("Admin")?.toLowerCase() === "true";
+  const isAdmin = adminParam || isAdminUser;
   const origin = getUrlParam("origin");
 
   useEffect(() => {
-    base44.auth.me().then((u) => {
-      if (u?.role === "admin") setIsAdminUser(true);
-    }).catch(() => {});
+    // Admin=true URL param overrides everything — no lookup needed.
+    if (adminParam) return;
+
+    if (isInFusionIframe()) {
+      // Embedded in fusion — derive admin access from the host bridge.
+      setIsAdminUser(isFusionAdmin());
+    } else {
+      // Direct access — fall back to the base44 user role.
+      base44.auth.me().then((u) => {
+        if (u?.role === "admin") setIsAdminUser(true);
+      }).catch(() => {});
+    }
   }, []);
 
   const { data: configs = [] } = useQuery({

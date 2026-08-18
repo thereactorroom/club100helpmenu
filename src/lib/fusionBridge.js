@@ -37,6 +37,32 @@ export function getFusionHostUrl() {
   return C.HOST_URL_PROD;
 }
 
+// ── Fusion member data ───────────────────────────────────────────────────────
+// Fetch the logged-in fusion member's community groups via the host bridge.
+// Returns the groups array (see fusionConfig example), or null if unavailable.
+export function getFusionMemberGroups() {
+  const fusionBridge = getGlobalBridge(C.FUSION_BRIDGE_NAME);
+  if (!fusionBridge || typeof fusionBridge.getUserCommunityGroups !== "function") {
+    return null;
+  }
+  try {
+    const response = fusionBridge.getUserCommunityGroups();
+    if (response && response.result && response.member && Array.isArray(response.member.groups)) {
+      return response.member.groups;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+// True if the logged-in fusion member has an active group named "Admin".
+export function isFusionAdmin() {
+  const groups = getFusionMemberGroups();
+  if (!groups) return false;
+  return groups.some((g) => g.status === "Active" && g.name === "Admin");
+}
+
 // ── Iframe detection ─────────────────────────────────────────────────────────
 // Determines if the app is running inside a fusion iframe.
 // Priority: top-level check → fresh parent host → sessionStorage cache → bridge globals.
