@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import InfoBlockCard from "../components/InfoBlockCard";
+import FusionCloseButton from "../components/FusionCloseButton";
 import { Settings, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getUrlParam } from "@/lib/urlParams";
@@ -118,6 +119,8 @@ export default function HelpDirectory() {
           </div>
         </div>
       </div>
+
+      <FusionCloseButton />
     </div>
   );
 }
