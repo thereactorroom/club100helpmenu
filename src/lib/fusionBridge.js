@@ -54,7 +54,24 @@ export async function getFusionMemberGroups() {
     return null;
   }
   try {
-    const response = await fusionBridge.getUserCommunityGroups();
+    // Bridge methods follow a (payload, callback) convention — deliver result via callback.
+    // Also race against a returned Promise and a safety timeout so we never hang.
+    const response = await new Promise((resolve) => {
+      let settled = false;
+      const finish = (value) => {
+        if (settled) return;
+        settled = true;
+        resolve(value);
+      };
+      const ret = fusionBridge.getUserCommunityGroups((data) => finish(data));
+      if (ret && typeof ret.then === "function") {
+        ret.then((data) => finish(data), () => finish(null));
+      }
+      setTimeout(() => {
+        console.warn("[FusionBridge] getUserCommunityGroups callback timed out");
+        finish(null);
+      }, 10000);
+    });
     console.log("[FusionBridge] resolved response from getUserCommunityGroups():", response);
     console.log("[FusionBridge] response (deep dump):");
     console.dir(response, { depth: null });
