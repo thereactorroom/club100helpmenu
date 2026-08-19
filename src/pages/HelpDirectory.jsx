@@ -7,7 +7,7 @@ import FusionCloseButton from "../components/FusionCloseButton";
 import { Settings, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getUrlParam } from "@/lib/urlParams";
-import { isInFusionIframe, isFusionAdmin } from "@/lib/fusionBridge";
+import { isInFusionIframe, isFusionAdmin, waitForFusionBridge } from "@/lib/fusionBridge";
 
 export default function HelpDirectory() {
   const navigate = useNavigate();
@@ -38,9 +38,11 @@ export default function HelpDirectory() {
     }
 
     if (isInFusionIframe()) {
-      // Embedded in fusion — derive admin access from the host bridge.
-      console.log("[HelpDirectory] running in fusion iframe — calling isFusionAdmin()");
-      setIsAdminUser(isFusionAdmin());
+      // Embedded in fusion — wait for the bridge script to load, then check admin.
+      console.log("[HelpDirectory] running in fusion iframe — waiting for FusionBridge");
+      waitForFusionBridge()
+        .then(() => setIsAdminUser(isFusionAdmin()))
+        .catch(() => setIsAdminUser(false));
     } else {
       // Direct access — fall back to the base44 user role.
       console.log("[HelpDirectory] not in iframe — checking base44 user role");

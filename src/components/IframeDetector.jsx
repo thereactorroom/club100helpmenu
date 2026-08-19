@@ -30,13 +30,19 @@ export default function IframeDetector() {
     }
 
     const bridgeSrc = getBridgeUrl(host);
-    if (bridgeSrc) {
-      window[FUSION_CONFIG.BRIDGE_FLAG] = true;
-      const script = document.createElement("script");
-      script.src = bridgeSrc;
-      script.async = true;
-      document.head.appendChild(script);
+    if (!bridgeSrc) {
+      console.warn("[IframeDetector] no bridge script URL for host:", host);
+      return;
     }
+    console.log("[IframeDetector] injecting bridge script:", bridgeSrc);
+
+    window[FUSION_CONFIG.BRIDGE_FLAG] = true;
+    const script = document.createElement("script");
+    script.src = bridgeSrc;
+    script.async = true;
+    script.onload = () => console.log("[IframeDetector] bridge script loaded:", bridgeSrc);
+    script.onerror = () => console.error("[IframeDetector] bridge script FAILED to load:", bridgeSrc);
+    document.head.appendChild(script);
   }, []);
 
   return null;

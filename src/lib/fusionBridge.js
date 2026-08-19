@@ -68,6 +68,30 @@ export function getFusionMemberGroups() {
   }
 }
 
+// Resolves once the FusionBridge global is available (bridge script loaded),
+// or rejects after the timeout. Call this before invoking bridge methods to
+// avoid races with the async script injection.
+export function waitForFusionBridge(timeoutMs = 10000) {
+  return new Promise((resolve, reject) => {
+    if (getGlobalBridge(C.FUSION_BRIDGE_NAME)) {
+      console.log("[FusionBridge] bridge already available");
+      return resolve();
+    }
+    const start = Date.now();
+    const interval = setInterval(() => {
+      if (getGlobalBridge(C.FUSION_BRIDGE_NAME)) {
+        clearInterval(interval);
+        console.log("[FusionBridge] bridge became available after", Date.now() - start, "ms");
+        resolve();
+      } else if (Date.now() - start > timeoutMs) {
+        clearInterval(interval);
+        console.warn("[FusionBridge] timed out waiting for bridge script to load");
+        reject(new Error("FusionBridge not available"));
+      }
+    }, 200);
+  });
+}
+
 // True if the logged-in fusion member has an active group named "Admin".
 export function isFusionAdmin() {
   const groups = getFusionMemberGroups();
