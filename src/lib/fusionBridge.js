@@ -56,6 +56,17 @@ export async function getFusionMemberGroups() {
   try {
     const response = await fusionBridge.getUserCommunityGroups();
     console.log("[FusionBridge] resolved response from getUserCommunityGroups():", response);
+    console.log("[FusionBridge] response (deep dump):");
+    console.dir(response, { depth: null });
+    try {
+      console.log("[FusionBridge] response (JSON):", JSON.stringify(response, null, 2));
+    } catch (e) {
+      console.log("[FusionBridge] response not JSON-serializable:", e);
+    }
+    console.log("[FusionBridge] response keys:", response ? Object.keys(response) : response);
+    console.log("[FusionBridge] response.result:", response?.result);
+    console.log("[FusionBridge] response.member:", response?.member);
+    console.log("[FusionBridge] response.member?.groups:", response?.member?.groups);
     if (response && response.result && response.member && Array.isArray(response.member.groups)) {
       console.log("[FusionBridge] parsed groups:", response.member.groups);
       return response.member.groups;
