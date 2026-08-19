@@ -53,25 +53,22 @@ export async function getFusionMemberGroups() {
     console.warn("[FusionBridge] getUserCommunityGroups is not a function on FusionBridge.");
     return null;
   }
+  // The bridge reads session/communityId from URL params into __context during init(),
+  // and needs __csrf (fetched by init()) for its API calls. Ensure init has completed.
+  console.log("[FusionBridge] bridge __context:", fusionBridge.__context);
+  console.log("[FusionBridge] bridge __csrf (pre):", fusionBridge.__csrf);
+  if (!fusionBridge.__csrf) {
+    console.log("[FusionBridge] __csrf empty — awaiting FusionBridge.init(1) to populate it");
+    try {
+      await fusionBridge.init(1);
+    } catch (e) {
+      console.warn("[FusionBridge] init() threw:", e);
+    }
+    console.log("[FusionBridge] bridge __csrf (post init):", fusionBridge.__csrf);
+  }
+
   try {
-    // Bridge methods follow a (payload, callback) convention — deliver result via callback.
-    // Also race against a returned Promise and a safety timeout so we never hang.
-    const response = await new Promise((resolve) => {
-      let settled = false;
-      const finish = (value) => {
-        if (settled) return;
-        settled = true;
-        resolve(value);
-      };
-      const ret = fusionBridge.getUserCommunityGroups((data) => finish(data));
-      if (ret && typeof ret.then === "function") {
-        ret.then((data) => finish(data), () => finish(null));
-      }
-      setTimeout(() => {
-        console.warn("[FusionBridge] getUserCommunityGroups callback timed out");
-        finish(null);
-      }, 10000);
-    });
+    const response = await fusionBridge.getUserCommunityGroups();
     console.log("[FusionBridge] resolved response from getUserCommunityGroups():", response);
     console.log("[FusionBridge] response (deep dump):");
     console.dir(response, { depth: null });
