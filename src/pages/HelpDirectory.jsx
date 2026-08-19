@@ -30,15 +30,22 @@ export default function HelpDirectory() {
   const origin = getUrlParam("origin");
 
   useEffect(() => {
+    console.log("[HelpDirectory] admin detection effect running", { adminParam, isFusionIframe: isInFusionIframe() });
     // Admin=true URL param overrides everything — no lookup needed.
-    if (adminParam) return;
+    if (adminParam) {
+      console.log("[HelpDirectory] Admin=true URL param present — admin forced on");
+      return;
+    }
 
     if (isInFusionIframe()) {
       // Embedded in fusion — derive admin access from the host bridge.
+      console.log("[HelpDirectory] running in fusion iframe — calling isFusionAdmin()");
       setIsAdminUser(isFusionAdmin());
     } else {
       // Direct access — fall back to the base44 user role.
+      console.log("[HelpDirectory] not in iframe — checking base44 user role");
       base44.auth.me().then((u) => {
+        console.log("[HelpDirectory] base44 user role:", u?.role);
         if (u?.role === "admin") setIsAdminUser(true);
       }).catch(() => {});
     }

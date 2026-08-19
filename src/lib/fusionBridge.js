@@ -41,17 +41,29 @@ export function getFusionHostUrl() {
 // Fetch the logged-in fusion member's community groups via the host bridge.
 // Returns the groups array (see fusionConfig example), or null if unavailable.
 export function getFusionMemberGroups() {
+  console.log("[FusionBridge] getFusionMemberGroups() called");
   const fusionBridge = getGlobalBridge(C.FUSION_BRIDGE_NAME);
-  if (!fusionBridge || typeof fusionBridge.getUserCommunityGroups !== "function") {
+  console.log("[FusionBridge] FusionBridge global:", fusionBridge);
+  if (!fusionBridge) {
+    console.warn("[FusionBridge] FusionBridge global not found — bridge script may not have loaded.");
+    return null;
+  }
+  console.log("[FusionBridge] typeof getUserCommunityGroups:", typeof fusionBridge.getUserCommunityGroups);
+  if (typeof fusionBridge.getUserCommunityGroups !== "function") {
+    console.warn("[FusionBridge] getUserCommunityGroups is not a function on FusionBridge.");
     return null;
   }
   try {
     const response = fusionBridge.getUserCommunityGroups();
+    console.log("[FusionBridge] raw response from getUserCommunityGroups():", response);
     if (response && response.result && response.member && Array.isArray(response.member.groups)) {
+      console.log("[FusionBridge] parsed groups:", response.member.groups);
       return response.member.groups;
     }
+    console.warn("[FusionBridge] response did not match expected shape { result, member.groups }.");
     return null;
-  } catch {
+  } catch (err) {
+    console.error("[FusionBridge] error calling getUserCommunityGroups():", err);
     return null;
   }
 }
@@ -59,8 +71,16 @@ export function getFusionMemberGroups() {
 // True if the logged-in fusion member has an active group named "Admin".
 export function isFusionAdmin() {
   const groups = getFusionMemberGroups();
-  if (!groups) return false;
-  return groups.some((g) => g.status === "Active" && g.name === "Admin");
+  console.log("[FusionBridge] isFusionAdmin() groups:", groups);
+  if (!groups) {
+    console.log("[FusionBridge] isFusionAdmin() → false (no groups)");
+    return false;
+  }
+  const adminGroup = groups.find((g) => g.status === "Active" && g.name === "Admin");
+  console.log("[FusionBridge] matching Admin group:", adminGroup);
+  const result = !!adminGroup;
+  console.log("[FusionBridge] isFusionAdmin() →", result);
+  return result;
 }
 
 // ── Iframe detection ─────────────────────────────────────────────────────────
