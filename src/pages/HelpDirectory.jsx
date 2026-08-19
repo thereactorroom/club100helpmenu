@@ -41,7 +41,8 @@ export default function HelpDirectory() {
       // Embedded in fusion — wait for the bridge script to load, then check admin.
       console.log("[HelpDirectory] running in fusion iframe — waiting for FusionBridge");
       waitForFusionBridge()
-        .then(() => setIsAdminUser(isFusionAdmin()))
+        .then(() => isFusionAdmin())
+        .then((isAdmin) => setIsAdminUser(isAdmin))
         .catch(() => setIsAdminUser(false));
     } else {
       // Direct access — fall back to the base44 user role.

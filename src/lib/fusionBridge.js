@@ -40,7 +40,7 @@ export function getFusionHostUrl() {
 // ── Fusion member data ───────────────────────────────────────────────────────
 // Fetch the logged-in fusion member's community groups via the host bridge.
 // Returns the groups array (see fusionConfig example), or null if unavailable.
-export function getFusionMemberGroups() {
+export async function getFusionMemberGroups() {
   console.log("[FusionBridge] getFusionMemberGroups() called");
   const fusionBridge = getGlobalBridge(C.FUSION_BRIDGE_NAME);
   console.log("[FusionBridge] FusionBridge global:", fusionBridge);
@@ -54,8 +54,8 @@ export function getFusionMemberGroups() {
     return null;
   }
   try {
-    const response = fusionBridge.getUserCommunityGroups();
-    console.log("[FusionBridge] raw response from getUserCommunityGroups():", response);
+    const response = await fusionBridge.getUserCommunityGroups();
+    console.log("[FusionBridge] resolved response from getUserCommunityGroups():", response);
     if (response && response.result && response.member && Array.isArray(response.member.groups)) {
       console.log("[FusionBridge] parsed groups:", response.member.groups);
       return response.member.groups;
@@ -93,8 +93,8 @@ export function waitForFusionBridge(timeoutMs = 10000) {
 }
 
 // True if the logged-in fusion member has an active group named "Admin".
-export function isFusionAdmin() {
-  const groups = getFusionMemberGroups();
+export async function isFusionAdmin() {
+  const groups = await getFusionMemberGroups();
   console.log("[FusionBridge] isFusionAdmin() groups:", groups);
   if (!groups) {
     console.log("[FusionBridge] isFusionAdmin() → false (no groups)");
