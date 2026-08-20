@@ -238,26 +238,23 @@ export function fusionDownload(url, filename) {
 
 // Open WhatsApp
 // Tries: NativeBridge.openWhatsApp → FusionBridge.openWhatsApp → postMessage → wa.me link
-export function fusionWhatsApp(phone, text) {
-  const uri = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
-
-  const nativeBridge = getGlobalBridge(C.NATIVE_BRIDGE_NAME);
-  if (nativeBridge && typeof nativeBridge.openWhatsApp === "function") {
-    nativeBridge.openWhatsApp({ uri });
-    return;
-  }
-
-  const fusionBridge = getGlobalBridge(C.FUSION_BRIDGE_NAME);
-  if (fusionBridge && typeof fusionBridge.openWhatsApp === "function") {
-    fusionBridge.openWhatsApp(uri);
-    return;
-  }
-
+export function fusionWhatsApp(uri) {
+  // Inside a fusion iframe → delegate to the host's NativeBridge.
   if (window.self !== window.top) {
+    const nativeBridge = getGlobalBridge(C.NATIVE_BRIDGE_NAME);
+    if (nativeBridge && typeof nativeBridge.openWhatsApp === "function") {
+      nativeBridge.openWhatsApp({ uri });
+      return;
+    }
+    const fusionBridge = getGlobalBridge(C.FUSION_BRIDGE_NAME);
+    if (fusionBridge && typeof fusionBridge.openWhatsApp === "function") {
+      fusionBridge.openWhatsApp(uri);
+      return;
+    }
     window.top.postMessage({ request: "openWhatsApp", payload: { uri } }, "*");
     return;
   }
-
+  // Standalone web → open the wa.me link directly.
   window.location.href = uri;
 }
 

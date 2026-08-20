@@ -7,7 +7,7 @@ import FusionCloseButton from "../components/FusionCloseButton";
 import { Settings, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getUrlParam } from "@/lib/urlParams";
-import { isInFusionIframe, isFusionAdmin, waitForFusionBridge } from "@/lib/fusionBridge";
+import { isInFusionIframe, isFusionAdmin, waitForFusionBridge, fusionWhatsApp } from "@/lib/fusionBridge";
 
 export default function HelpDirectory() {
   const navigate = useNavigate();
@@ -93,7 +93,7 @@ export default function HelpDirectory() {
           <div className="mt-3 mb-1 flex items-center justify-between">
             {config?.whatsappHelpEnabled && config?.whatsappHelpUrl && (
               <Button
-                onClick={() => window.parent.postMessage({ action: 'openWhatsApp', payload: config.whatsappHelpUrl }, origin || '*')}
+                onClick={() => fusionWhatsApp(config.whatsappHelpUrl)}
                 className="gap-1.5"
                 variant="default"
                 size="sm"

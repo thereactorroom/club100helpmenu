@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { getUrlParam } from "@/lib/urlParams";
 import { ArrowLeft, MessageCircle, FileText } from "lucide-react";
+import { fusionWhatsApp } from "@/lib/fusionBridge";
 
 
 export default function HelpDetail() {
@@ -80,7 +81,7 @@ export default function HelpDetail() {
             <div className="flex flex-col items-end justify-between flex-shrink-0 self-stretch">
               {config?.whatsappHelpEnabled && config?.whatsappHelpUrl && (
                 <button
-                  onClick={() => window.parent.postMessage({ action: 'openWhatsApp', payload: config.whatsappHelpUrl }, origin || '*')}
+                  onClick={() => fusionWhatsApp(config.whatsappHelpUrl)}
                   className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 transition-opacity"
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
