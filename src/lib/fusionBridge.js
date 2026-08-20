@@ -125,9 +125,11 @@ export async function isFusionAdmin() {
     console.log("[FusionBridge] isFusionAdmin() → false (no groups)");
     return false;
   }
-  const adminGroup = groups.find((g) => g.status === "Active" && g.name === "Admin");
-  console.log("[FusionBridge] matching Admin group:", adminGroup);
-  const result = !!adminGroup;
+  const adminGroups = groups.filter(
+    (g) => g && typeof g.name === "string" && g.name.toLowerCase() === "admin"
+  );
+  console.log("[FusionBridge] admin-named groups found:", adminGroups);
+  const result = adminGroups.length > 0;
   console.log("[FusionBridge] isFusionAdmin() →", result);
   return result;
 }
